@@ -1,0 +1,100 @@
+# deploy.yml
+#
+# Why this file exists:
+# This IS the CI/CD pipeline. It has two jobs:
+#   1. build-test-deploy  -> installs deps, runs tests, deploys the sample app
+#   2. analyze-failure    -> ONLY runs `if: failure()` — i.e. only when
+#                             job 1 broke. This is the trigger point for
+#                             the whole rest of this project.
+#
+# Splitting these into two separate jobs (rather than one long job)
+# matters: `if: failure()` at the job level can see whether ANY
+# previous job failed, and GitHub Actions still lets us fetch logs from
+# a job that already finished (failed), which we need for log_collector.py.
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-test-deploy:
+    name: Build, Test, Deploy
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sample-app
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: sample-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
+      # This step is a placeholder for a real AWS Amplify deploy. In a
+      # real setup you'd use the `aws-amplify` CLI or the Amplify
+      # GitHub integration (which auto-deploys on push once connected).
+      # We keep it explicit here so the pipeline stage is visible.
+      - name: Deploy to AWS Amplify
+        run: echo "Deploying sample-app to AWS Amplify..."
+        # Real version would look something like:
+        # run: npx ampx pipeline-deploy --branch main --app-id $AMPLIFY_APP_ID
+        # env:
+        #   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        #   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+  analyze-failure:
+    name: Analyze Failure with AI
+    needs: build-test-deploy
+    if: failure()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install analyzer dependencies
+        run: pip install -r analyzer/requirements.txt
+
+      - name: Install Ollama and pull Llama 3.2
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          ollama serve &
+          sleep 5
+          ollama pull llama3.2
+
+      - name: Run the Failure Analyzer
+        working-directory: analyzer
+        run: python main.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          OLLAMA_HOST: http://localhost:11434
+          OLLAMA_MODEL: llama3.2
+
+      - name: Upload report as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-report
+          path: analyzer/reports/

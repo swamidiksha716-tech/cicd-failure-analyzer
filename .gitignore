@@ -1,0 +1,6 @@
+node_modules/
+.env
+__pycache__/
+*.pyc
+analyzer/reports/*.json
+!analyzer/reports/.gitkeep
