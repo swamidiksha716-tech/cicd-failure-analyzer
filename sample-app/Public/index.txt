@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CI/CD Failure Analyzer</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    color: #e2e8f0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    max-width: 640px;
+    width: 100%;
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 16px;
+    padding: 48px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(34, 197, 94, 0.15);
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    color: #4ade80;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4ade80;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  h1 {
+    font-size: 28px;
+    margin-bottom: 12px;
+    background: linear-gradient(90deg, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  p.sub {
+    color: #94a3b8;
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+  .step {
+    background: rgba(96, 165, 250, 0.1);
+    border: 1px solid rgba(96, 165, 250, 0.3);
+    color: #93c5fd;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 24px;
+    border-top: 1px solid rgba(148, 163, 184, 0.15);
+    font-size: 13px;
+    color: #64748b;
+  }
+  .footer a {
+    color: #93c5fd;
+    text-decoration: none;
+  }
+  .footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge"><span class="dot"></span> Service Healthy</div>
+    <h1>CI/CD Failure Analyzer</h1>
+    <p class="sub">
+      This app is deployed by a pipeline that automatically detects deployment
+      failures, analyzes the logs with a local LLM, and alerts the team on
+      Slack — all without a human reading a single log line by hand.
+    </p>
+    <div class="flow">
+      <span class="step">Push</span>
+      <span class="step">→ GitHub Actions</span>
+      <span class="step">→ Test</span>
+      <span class="step">→ Deploy</span>
+      <span class="step">→ AI Analysis on Failure</span>
+      <span class="step">→ Slack Alert</span>
+    </div>
+    <div class="footer">
+      <span>Deployed live via Render</span>
+      <a href="https://github.com/swamidiksha716-tech/cicd-failure-analyzer" target="_blank">View source on GitHub →</a>
+    </div>
+  </div>
+</body>
+</html>
